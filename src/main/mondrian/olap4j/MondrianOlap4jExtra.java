@@ -269,7 +269,14 @@ class MondrianOlap4jExtra implements XmlaHandler.XmlaExtra {
     public List<org.olap4j.metadata.Property> getLevelProperties(Level level) {
         MondrianOlap4jLevel olap4jLevel = (MondrianOlap4jLevel) level;
         return olap4jLevel.getProperties(false);
+       // return olap4jLevel.getProperties(true);
+
     }
+    
+    public List<org.olap4j.metadata.Property> getLevelInternalProperties(Level level) {
+       MondrianOlap4jLevel olap4jLevel = (MondrianOlap4jLevel) level;
+       return olap4jLevel.getProperties();
+   }
 
     public boolean isPropertyInternal(org.olap4j.metadata.Property property) {
         MondrianOlap4jProperty olap4jProperty =

@@ -137,7 +137,7 @@ public class UtilCompatibleJdk15 implements UtilCompatible {
         throw new AssertionError("Could not find tenured space");
     }
 
-    public void cancelStatement(Statement stmt) {
+    public void cancelAndCloseStatement(Statement stmt) {
         try {
             stmt.cancel();
         } catch (Exception e) {
@@ -148,6 +148,17 @@ public class UtilCompatibleJdk15 implements UtilCompatible {
             {
                 return;
             }
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug(
+                    MondrianResource.instance()
+                        .ExecutionStatementCleanupException
+                            .ex(e.getMessage(), e),
+                    e);
+            }
+        }
+        try {
+            stmt.close();
+        } catch (Exception e) {
             if (LOGGER.isDebugEnabled()) {
                 LOGGER.debug(
                     MondrianResource.instance()

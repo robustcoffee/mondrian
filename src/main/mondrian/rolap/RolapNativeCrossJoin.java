@@ -214,7 +214,22 @@ public class RolapNativeCrossJoin extends RolapNativeSet {
         final int savepoint = evaluator.savepoint();
 
         try {
-            overrideContext(evaluator, cjArgs, null);
+            Member[] evalMembers = evaluator.getMembers().clone();
+            for (RolapLevel level : levels) {
+                RolapHierarchy hierarchy = level.getHierarchy();
+                memberLoop:
+                for (int i = 0; i < evalMembers.length; ++i) {
+                    Dimension evalMemberDimension =
+                        evalMembers[i].getHierarchy().getDimension();
+                    if (evalMemberDimension == hierarchy.getDimension()
+                        && !evalMembers[i].isAll())
+                    {
+                        evalMembers[i] = hierarchy.getAllMember();
+                        break memberLoop;
+                    }
+                }
+            }
+            evaluator.setContext(evalMembers);
 
             // Use the combined CrossJoinArg for the tuple constraint,
             // which will be translated to the SQL WHERE clause.

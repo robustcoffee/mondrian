@@ -131,7 +131,7 @@ public class UtilCompatibleJdk14 implements UtilCompatible {
         return new Timer(isDaemon);
     }
 
-    public void cancelStatement(Statement stmt) {
+    public void cancelAndCloseStatement(Statement stmt) {
         try {
             stmt.cancel();
         } catch (Exception e) {
@@ -142,6 +142,17 @@ public class UtilCompatibleJdk14 implements UtilCompatible {
             {
                 return;
             }
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug(
+                    MondrianResource.instance()
+                        .ExecutionStatementCleanupException
+                            .ex(e.getMessage(), e),
+                    e);
+            }
+        }
+        try {
+            stmt.close();
+        } catch (Exception e) {
             if (LOGGER.isDebugEnabled()) {
                 LOGGER.debug(
                     MondrianResource.instance()

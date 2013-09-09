@@ -11,6 +11,7 @@
 package mondrian.xmla;
 
 import mondrian.olap.Util;
+import mondrian.xmla.RowsetDefinition.Column;
 
 import org.apache.log4j.Logger;
 
@@ -147,6 +148,16 @@ abstract class Rowset implements XmlaConstants {
             break;
         case Catalog:
             break;
+        
+        //Following values are attached at the header of the incoming xmla requests.
+        case DbpropMsmdRequestID:
+           break;
+        case DbpropMsmdOptimizeResponse:
+           break;
+        case DbpropMsmdActivityID:
+           break;
+        case DbpropMsmdFlattened2:
+           break;
         case LocaleIdentifier:
             if (value != null) {
                 try {
@@ -271,28 +282,38 @@ abstract class Rowset implements XmlaConstants {
      * @param row Row
      * @param response XMLA response writer
      */
-    protected void emit(Row row, XmlaResponse response)
+    @SuppressWarnings("rawtypes")
+   protected void emit(Row row, XmlaResponse response)
         throws XmlaException, SQLException
     {
         SaxWriter writer = response.getWriter();
 
+        RowsetDefinition.Column[] newColumns = new RowsetDefinition.Column[rowsetDefinition.columnDefinitions.length];
+        int propertyNameIndex = 0;
+        int propertyTypeIndex = 0;
+        newColumns = rowsetDefinition.columnDefinitions;
+        for(int i=0;i<rowsetDefinition.columnDefinitions.length; i++){
+           if(newColumns[i].name.equals("PROPERTY_NAME")){
+              propertyNameIndex = i;
+           }
+           if(newColumns[i].name.equals("PROPERTY_TYPE")){
+              propertyTypeIndex = i;
+           }
+        }
+        
+        if(propertyNameIndex<propertyTypeIndex){
+           Column replaceCol = newColumns[propertyNameIndex];
+           newColumns[propertyNameIndex] = newColumns[propertyTypeIndex];
+           newColumns[propertyTypeIndex] =  replaceCol;
+        }
+        
         writer.startElement("row");
         for (RowsetDefinition.Column column
-            : rowsetDefinition.columnDefinitions)
+            : newColumns)
         {
             Object value = row.get(column.name);
             if (value == null) {
-                if (!column.nullable) {
-                    throw new XmlaException(
-                        CLIENT_FAULT_FC,
-                        HSB_BAD_NON_NULLABLE_COLUMN_CODE,
-                        HSB_BAD_NON_NULLABLE_COLUMN_FAULT_FS,
-                        Util.newInternal(
-                            "Value required for column "
-                            + column.name
-                            + " of rowset "
-                            + rowsetDefinition.name()));
-                }
+              // writer.textElement(column.name, value);
             } else if (value instanceof XmlElement[]) {
                 XmlElement[] elements = (XmlElement[]) value;
                 for (XmlElement element : elements) {
@@ -353,12 +374,35 @@ abstract class Rowset implements XmlaConstants {
 
     /**
      * Populates all of the values in an enumeration into a list of rows.
+    * @param <E>
      */
+    
+//    private <E> List<Row> getLiteralRows(RowsetDefinition rowsetDefinition, Class<E> clazz){
+//       List<Row> rows= new ArrayList<Row>();
+//       Map<String, List<String>> literalData = RowsetDefinition.DiscoverLiteralsRowset.fillLiteralSchema();
+//       
+//       Set<String> keySet = literalData.keySet();
+//       Iterator<String> ksItr = keySet.iterator();
+//       while(ksItr.hasNext()){
+//          Row row = new Row();
+//          String key = ksItr.next().toString();
+//          row.names.add(key);
+//          row.values.addAll((List<String>)literalData.get(key));
+//          rows.add(row);
+//       }
+//       return rows;
+//    }
     protected <E> void populate(
         Class<E> clazz, List<Row> rows,
         final Comparator<E> comparator)
         throws XmlaException
     {
+       
+       // Handle request for DISCOVER_LITERAL schema
+//        if(clazz.getName().equals("org.olap4j.metadata.XmlaConstants$Literal")){
+//           rows = getLiteralRows(rowsetDefinition, clazz);
+//        }
+//        else {
         final E[] enumsSortedByName = clazz.getEnumConstants().clone();
         Arrays.sort(enumsSortedByName, comparator);
         for (E anEnum : enumsSortedByName) {
@@ -372,6 +416,7 @@ abstract class Rowset implements XmlaConstants {
             rows.add(row);
         }
     }
+// }
 
     /**
      * Creates a condition functor based on the restrictions on a given metadata
@@ -417,7 +462,8 @@ abstract class Rowset implements XmlaConstants {
      *     work on the name or unique name of elements
      * @return Condition functor
      */
-    <E, V> Util.Functor1<Boolean, E> makeCondition(
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+   <E, V> Util.Functor1<Boolean, E> makeCondition(
         final Util.Functor1<V, ? super E> getter,
         RowsetDefinition.Column column)
     {
@@ -460,7 +506,8 @@ abstract class Rowset implements XmlaConstants {
      * if all members of the array have the same value (in which case
      * one could return, again, simply a single String).
      */
-    String getRestrictionValueAsString(RowsetDefinition.Column column) {
+    @SuppressWarnings("unchecked")
+   String getRestrictionValueAsString(RowsetDefinition.Column column) {
         final Object restriction = restrictions.get(column.name);
         if (restriction instanceof List) {
             List<String> rval = (List<String>) restriction;
@@ -475,7 +522,8 @@ abstract class Rowset implements XmlaConstants {
      * Returns a column's restriction as an <code>int</code> if it
      * exists, -1 otherwise.
      */
-    int getRestrictionValueAsInt(RowsetDefinition.Column column) {
+    @SuppressWarnings("unchecked")
+   int getRestrictionValueAsInt(RowsetDefinition.Column column) {
         final Object restriction = restrictions.get(column.name);
         if (restriction instanceof List) {
             List<String> rval = (List<String>) restriction;

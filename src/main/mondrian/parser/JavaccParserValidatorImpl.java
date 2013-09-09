@@ -20,6 +20,7 @@ import mondrian.server.Statement;
  */
 public class JavaccParserValidatorImpl implements MdxParserValidator {
     private final QueryPartFactory factory;
+    private static String prevoiousQuery = null;
 
     /**
      * Creates a JavaccParserValidatorImpl.
@@ -38,6 +39,11 @@ public class JavaccParserValidatorImpl implements MdxParserValidator {
         this.factory = factory;
     }
 
+//    public String preProcessMdxStatement(String query) {
+//       //Excel sent mdx statement without "FROM SOURCE"
+//       query.split("FROM");
+//       query.split(arg0, arg1)
+//    }
     public QueryPart parseInternal(
         Statement statement,
         String queryString,

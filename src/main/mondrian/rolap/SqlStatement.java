@@ -132,11 +132,8 @@ public class SqlStatement {
         Counters.SQL_STATEMENT_EXECUTE_COUNT.incrementAndGet();
         Counters.SQL_STATEMENT_EXECUTING_IDS.add(id);
         String status = "failed";
-        Statement statement = null;
+        Statement statement;
         try {
-            // Check execution state
-            locus.execution.checkCancelOrTimeout();
-
             this.jdbcConnection = dataSource.getConnection();
             querySemaphore.enter();
             haveSemaphore = true;
@@ -162,13 +159,8 @@ public class SqlStatement {
             if (hook != null) {
                 hook.onExecuteQuery(sql);
             }
-
-            // Check execution state
-            locus.execution.checkCancelOrTimeout();
-
             startTimeNanos = System.nanoTime();
             startTimeMillis = System.currentTimeMillis();
-
             if (resultSetType < 0 || resultSetConcurrency < 0) {
                 statement = jdbcConnection.createStatement();
             } else {
@@ -245,13 +237,15 @@ public class SqlStatement {
             }
         } catch (Throwable e) {
             status = ", failed (" + e + ")";
-
-            // This statement was leaked to us. It is our responsibility
-            // to dispose of it.
-            Util.close(null, statement, null);
-
-            // Now handle this exception.
-            throw handle(e);
+            if (e instanceof Error) {
+                try {
+                    close();
+                } catch (Throwable ignore) {
+                }
+                throw (Error) e;
+            } else {
+                throw handle(e);
+            }
         } finally {
             RolapUtil.SQL_LOGGER.debug(id + ": " + status);
 
@@ -355,7 +349,7 @@ public class SqlStatement {
             Util.newError(e, locus.message + "; sql=[" + sql + "]");
         try {
             close();
-        } catch (Throwable t) {
+        } catch (RuntimeException re) {
             // ignore
         }
         return runtimeException;

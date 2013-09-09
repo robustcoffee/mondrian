@@ -179,7 +179,6 @@ public class RolapCell implements Cell {
                     "Error while counting drill-through"));
         try {
             ResultSet rs = stmt.getResultSet();
-            assert rs.getMetaData().getColumnCount() == 1;
             rs.next();
             ++stmt.rowCount;
             return rs.getInt(1);
@@ -502,6 +501,10 @@ public class RolapCell implements Cell {
     }
 
     public Object getPropertyValue(String propertyName) {
+       
+       if(propertyName.equals("LANGUAGE")){
+         return 1033;
+       }
         final boolean matchCase =
             MondrianProperties.instance().CaseSensitive.get();
         Property property = Property.lookup(propertyName, matchCase);
@@ -536,6 +539,9 @@ public class RolapCell implements Cell {
                 return canDrillThrough() ? MDACTION_TYPE_DRILLTHROUGH : 0;
             case Property.DRILLTHROUGH_COUNT_ORDINAL:
                 return canDrillThrough() ? getDrillThroughCount() : -1;
+//                break;
+//            case Property.LANGUAGE:
+//                 return 1033;
             default:
                 // fall through
             }

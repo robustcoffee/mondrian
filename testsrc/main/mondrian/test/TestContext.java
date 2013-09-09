@@ -18,7 +18,6 @@ import mondrian.olap.DriverManager;
 import mondrian.olap.*;
 import mondrian.olap.Position;
 import mondrian.olap.fun.FunUtil;
-import mondrian.olap4j.MondrianInprocProxy;
 import mondrian.resource.MondrianResource;
 import mondrian.rolap.*;
 import mondrian.spi.*;
@@ -29,7 +28,6 @@ import junit.framework.*;
 import junit.framework.Test;
 
 import org.olap4j.*;
-import org.olap4j.driver.xmla.XmlaOlap4jDriver;
 import org.olap4j.impl.CoordinateIterator;
 import org.olap4j.layout.TraditionalCellSetFormatter;
 
@@ -503,51 +501,6 @@ public class TestContext {
         }
         return cellSet;
     }
-
-    public CellSet executeOlap4jXmlaQuery(String queryString)
-        throws SQLException
-    {
-        String schema = getConnectionProperties()
-            .get(RolapConnectionProperties.CatalogContent.name());
-        if (schema == null) {
-            schema = getRawSchema();
-        }
-        // TODO:  Need to better handle semicolons in schema content.
-        // Util.parseValue does not appear to allow escaping them.
-        schema = schema.replace("&quot;", "").replace(";", "");
-
-        String Jdbc = getConnectionProperties()
-            .get(RolapConnectionProperties.Jdbc.name());
-
-        String cookie = XmlaOlap4jDriver.nextCookie();
-        Map<String, String> catalogs = new HashMap<String, String>();
-        catalogs.put("FoodMart", "");
-        XmlaOlap4jDriver.PROXY_MAP.put(
-            cookie, new MondrianInprocProxy(
-                catalogs,
-                "jdbc:mondrian:Server=http://whatever;"
-                +  "Jdbc=" + Jdbc + ";TestProxyCookie="
-                + cookie
-                + ";CatalogContent=" + schema));
-        try {
-            Class.forName("org.olap4j.driver.xmla.XmlaOlap4jDriver");
-        } catch (ClassNotFoundException e) {
-            throw new RuntimeException("oops", e);
-        }
-        Properties info = new Properties();
-        info.setProperty(
-            XmlaOlap4jDriver.Property.CATALOG.name(), "FoodMart");
-        java.sql.Connection connection = java.sql.DriverManager.getConnection(
-            "jdbc:xmla:Server=http://whatever;Catalog=FoodMart;TestProxyCookie="
-                + cookie,
-            info);
-        OlapConnection olapConnection =
-            connection.unwrap(OlapConnection.class);
-        OlapStatement statement = olapConnection.createStatement();
-        return  statement.executeOlapQuery(queryString);
-    }
-
-
 
     /**
      * Checks that a {@link Result} is valid.
@@ -1089,24 +1042,6 @@ public class TestContext {
     }
 
     /**
-     * Executes a query and checks that the result is a given string,
-     * displaying a message if result does not match desiredResult.
-     */
-    public void assertQueryReturns(
-        String message, String query, String desiredResult)
-    {
-        Result result = executeQuery(query);
-        String resultString = toString(result);
-        if (desiredResult != null) {
-            assertEqualsVerbose(
-                desiredResult,
-                upgradeActual(resultString),
-                true, message);
-        }
-    }
-
-
-    /**
      * Executes a very simple query.
      *
      * <p>This forces the schema to be loaded and performs a basic sanity check.
@@ -1497,10 +1432,9 @@ public class TestContext {
         // problems... probably with the dialectize method
         assertEqualsVerbose(actualSql, dialectize(actualSql));
 
-        String transformedExpectedSql = removeQuotes(dialectize(expectedSql))
-            .replaceAll("\r\n", "\n");
-        String transformedActualSql = removeQuotes(actualSql)
-            .replaceAll("\r\n", "\n");
+        String transformedExpectedSql = removeQuotes(dialectize(expectedSql));
+        String transformedActualSql = removeQuotes(actualSql);
+
         Assert.assertEquals(transformedExpectedSql, transformedActualSql);
 
         checkSqlAgainstDatasource(actualSql, expectedRows);

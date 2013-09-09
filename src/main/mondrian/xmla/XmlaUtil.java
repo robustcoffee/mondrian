@@ -14,6 +14,7 @@ import mondrian.olap.MondrianException;
 import mondrian.olap.Util;
 import mondrian.xmla.impl.DefaultXmlaResponse;
 
+import org.apache.tools.ant.taskdefs.Length;
 import org.olap4j.OlapConnection;
 import org.olap4j.OlapException;
 
@@ -256,35 +257,45 @@ way too noisy
      * @param numericStr Numeric string
      * @return Normalized string
      */
-    public static String normalizeNumericString(String numericStr) {
-        int index = numericStr.indexOf('.');
-        if (index > 0) {
-            // If it uses exponential notation, 1.0E4, then it could
-            // have a trailing '0' that should not be stripped of,
-            // e.g., 1.0E10. This would be rather bad.
-            if (numericStr.indexOf('e') != -1) {
-                return numericStr;
-            } else if (numericStr.indexOf('E') != -1) {
-                return numericStr;
+    public static String normalizeNumericString(String numericStr, boolean isDecimal) {
+       
+       
+       if(numericStr.equals("0")|| numericStr.equals(null))
+          return "0";
+       
+       //trim the ".0" if the input integer is in the format ##.0 
+        if(!isDecimal && numericStr.contains(".")){
+            String[] strArray = numericStr.split("\\.");
+            return strArray[0];
+         }
+         
+         Integer digits = numericStr.length();
+         int index = numericStr.indexOf('.');
+         
+         if (index > 0) {
+            digits = index;
+       }
+            char[] chars = numericStr.toCharArray();
+            int start = 0;
+            if (chars[0] =='-'){
+               start = 1;
             }
-
-            boolean found = false;
-            int p = numericStr.length();
-            char c = numericStr.charAt(p - 1);
-            while (c == '0') {
-                found = true;
-                p--;
-                c = numericStr.charAt(p - 1);
+            
+            char[] newChars = new char[chars.length+1];
+            Integer E = 0;
+            for(int i =start;i<chars.length;i++){
+              if(chars[i] =='.'){
+                 E = i-1;
+                 while(i>1){
+                    chars[i] = chars[i-1];
+                    i--;
+                 }
+                 chars[start+1] = '.';
+                 break;
+              }
             }
-            if (c == '.') {
-                p--;
-            }
-            if (found) {
-                return numericStr.substring(0, p);
-            }
-        }
-        return numericStr;
-    }
+            return new String(chars).concat("E"+E.toString());
+     }
 
     /**
      * Returns a set of column headings and rows for a given metadata request.

@@ -14,7 +14,7 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="http://ant.apache.org/ivy/schemas/ivy.xsd">
 
-    <info organisation="pentaho" module="mondrian-workbench" revision="${project.revision}">
+    <info organisation="pentaho" module="mondrian-workbench" revision="TRUNK-SNAPSHOT">
         <license name="EPL" url="http://www.eclipse.org/legal/epl-v10.html"/>
         <ivyauthor name="Julian Hyde" />
         <repository name="pentaho-rep" url="http://repo.pentaho.org"/>
@@ -22,7 +22,7 @@
             Mondrian workbench.
         </description>
     </info>
-    <dependencies defaultconf="default->default">
+    <dependencies>
         <dependency org="commons-codec" name="commons-codec" rev="1.2"/>
         <dependency org="commons-httpclient" name="commons-httpclient" rev="3.0.1"/>
         <dependency org="commons-lang" name="commons-lang" rev="2.3"/>
@@ -30,35 +30,30 @@
         <dependency org="jaxen" name="jaxen" rev="1.1.1"/>
         <dependency org="dom4j" name="dom4j" rev="1.6.1"/>
         <dependency org="junit" name="junit" rev="4.0"/>
-        <dependency org="org.codehaus.groovy" name="groovy-all" rev="1.5.6" transitive="false"/>
-
+        <dependency org="pentaho" name="pentaho-mondrianschemaworkbench-plugins" rev="${dependency.schemaworkbench-plugins.revision}" transitive="false" changing="true"/>
         <dependency org="pentaho" name="pentaho-xul-core" rev="${dependency.pentaho-xul.revision}" changing="true" />
         <dependency org="pentaho" name="pentaho-xul-swing" rev="${dependency.pentaho-xul.revision}" changing="true" />
 	    <dependency org="commons-beanutils" name="commons-beanutils" rev="1.6" transitive="false"/>
-
-        <dependency org="pentaho-kettle" name="kettle-core" rev="${dependency.kettle.revision}" changing="true"/>
+	    <dependency org="org.codehaus.groovy" name="groovy-all" rev="1.5.6" transitive="false"/>
+        <dependency org="pentaho-kettle" name="kettle-core" rev="${dependency.kettle.revision}"  changing="true"/>
+        <dependency org="pentaho-kettle" name="kettle-engine" rev="${dependency.kettle.revision}"  changing="true"/>
         <dependency org="pentaho-kettle" name="kettle-dbdialog" rev="${dependency.kettle.revision}" changing="true">
-            <exclude org="pentaho-kettle" module="kettle-engine"/>
+          <artifact name="kettle-dbdialog" ext="jar"/>
+          <exclude org="mysql" module="mysql-connector-java"/>
+          <exclude org="hsqldb" module="hsqldb"/>
         </dependency>
 
-        <!-- jersey-->
-        <dependency org="com.sun.jersey"           name="jersey-core"       rev="1.16" transitive="false"/>
-        <dependency org="com.sun.jersey"           name="jersey-client"     rev="1.16" transitive="false"/>
-        <dependency org="com.sun.jersey.contribs"  name="jersey-multipart"  rev="1.16" transitive="false"/>
-        
-        <!-- Pentaho Application Launcher -->
-        <dependency org="pentaho" name="pentaho-application-launcher" rev="${dependency.pentaho-launcher.revision}" changing="true"/>
+        <dependency org="xerces" name="xercesImpl" rev="2.9.1"/>
 
+        <!--  internal runtime dependencies -->
+        <dependency org="pentaho" name="pentaho-application-launcher" rev="${dependency.pentaho-launcher.revision}">
+          <artifact name="pentaho-application-launcher" ext="jar" type="jar"/>
+        </dependency>
 
         <!--Exclusions-->
         <exclude org="jaxme" module="jaxme-api"/>
         <exclude org="jdom" module="jdom"/>
         <exclude org="xom" module="xom"/>
         <exclude org="com.ibm.icu" module="icu4j"/>
-        <!-- Don't pull xerces here. This will get picked by the
-             master mondrian build and will be put in the lib folder
-             of the workbench. -->
-        <exclude org="xerces" module="xercesImpl"/>
-        <exclude org="xml-apis" module="xml-apis"/>
     </dependencies>
 </ivy-module>

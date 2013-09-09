@@ -28,12 +28,13 @@ public class NetezzaDialect extends PostgreSqlDialect {
     public static final JdbcDialectFactory FACTORY =
         new JdbcDialectFactory(
             NetezzaDialect.class,
-            // Netezza behaves the same as PostGres but doesn't use the
-            // postgres driver, so we setup the factory to NETEZZA.
-            DatabaseProduct.NETEZZA)
+            // While we're choosing dialects, this still looks like a Postgres
+            // connection.
+            DatabaseProduct.POSTGRESQL)
         {
             protected boolean acceptsConnection(Connection connection) {
-                return isDatabase(DatabaseProduct.NETEZZA, connection);
+                return super.acceptsConnection(connection)
+                   && isDatabase(DatabaseProduct.NETEZZA, connection);
             }
         };
 

@@ -31,10 +31,32 @@ public interface XmlaConstants {
     /* Namespaces for XML */
     public static final String NS_XSD = "http://www.w3.org/2001/XMLSchema";
     public static final String NS_XSI = "http://www.w3.org/2001/XMLSchema-instance";
+    public static final String MS_XMLA="http://schemas.microsoft.com/analysisservices/2003/xmla";
 
     /* Namespaces for XML/A */
     public static final String NS_XMLA =
         "urn:schemas-microsoft-com:xml-analysis";
+    public static final String NS_XMLA_DDL2 =
+             "http://schemas.microsoft.com/analysisservices/2003/engine/2";
+    public static final String NS_XMLA_DDL2_2 =
+             "http://schemas.microsoft.com/analysisservices/2003/engine/2/2";
+    public static final String NS_XMLA_DDL100= 
+             "http://schemas.microsoft.com/analysisservices/2008/engine/100";
+    public static final String NS_XMLA_DDL100_100= 
+             "http://schemas.microsoft.com/analysisservices/2008/engine/100/100";
+    public static final String NS_XMLA_DDL200= 
+             "http://schemas.microsoft.com/analysisservices/2010/engine/200";
+    public static final String NS_XMLA_DDL200_200= 
+             "http://schemas.microsoft.com/analysisservices/2010/engine/200/200";
+    public static final String NS_XMLA_DDL300= 
+             "http://schemas.microsoft.com/analysisservices/2010/engine/300";
+    public static final String NS_XMLA_DDL300_300= 
+             "http://schemas.microsoft.com/analysisservices/2010/engine/300/300";
+    public static final String NS_XMLA_DDL400= 
+             "http://schemas.microsoft.com/analysisservices/2010/engine/400";
+    public static final String NS_XMLA_DDL400_400= 
+             "http://schemas.microsoft.com/analysisservices/2010/engine/400/400";
+    
     public static final String NS_XMLA_MDDATASET =
         "urn:schemas-microsoft-com:xml-analysis:mddataset";
     public static final String NS_XMLA_EMPTY =
@@ -48,7 +70,7 @@ public interface XmlaConstants {
     public static final String NS_SOAP_SECEXT =
         "http://schemas.xmlsoap.org/ws/2002/04/secext";
 
-    public static final String SOAP_PREFIX = "SOAP-ENV";
+    public static final String SOAP_PREFIX = "soap";
 
     /*
      * Soap Header mustUnderstand attribute name.

@@ -1406,6 +1406,20 @@ public class Util extends XOMUtil {
     }
 
     /**
+     * Masks Mondrian's version number from a string.
+     *
+     * @param str String
+     * @return String with each occurrence of mondrian's version number
+     *    (e.g. "2.3.0.0") replaced with "${mondrianVersion}"
+     */
+    public static String maskVersion(String str) {
+        MondrianServer.MondrianVersion mondrianVersion =
+            MondrianServer.forId(null).getVersion();
+        String versionString = mondrianVersion.getVersionString();
+        return replace(str, versionString, "${mondrianVersion}");
+    }
+
+    /**
      * Converts a list of SQL-style patterns into a Java regular expression.
      *
      * <p>For example, {"Foo_", "Bar%BAZ"} becomes "Foo.|Bar.*BAZ".
@@ -1557,12 +1571,12 @@ public class Util extends XOMUtil {
     /**
      * Closes and cancels a {@link Statement} using the correct methods
      * available on the current Java runtime.
-     * <p>If errors are encountered while canceling a statement,
+     * <p>If errors are encountered while canceling or closing a statement,
      * the message is logged in {@link Util}.
-     * @param stmt The statement to cancel.
+     * @param stmt The statement to cancel and close.
      */
-    public static void cancelStatement(Statement stmt) {
-        compatible.cancelStatement(stmt);
+    public static void cancelAndCloseStatement(Statement stmt) {
+        compatible.cancelAndCloseStatement(stmt);
     }
 
     public static MemoryInfo getMemoryInfo() {
@@ -2308,28 +2322,25 @@ public class Util extends XOMUtil {
                     statement = resultSet.getStatement();
                 }
                 resultSet.close();
-            } catch (Throwable t) {
-                firstException = new SQLException();
-                firstException.initCause(t);
+            } catch (SQLException e) {
+                firstException = e;
             }
         }
         if (statement != null) {
             try {
                 statement.close();
-            } catch (Throwable t) {
+            } catch (SQLException e) {
                 if (firstException == null) {
-                    firstException = new SQLException();
-                    firstException.initCause(t);
+                    firstException = e;
                 }
             }
         }
         if (connection != null) {
             try {
                 connection.close();
-            } catch (Throwable t) {
+            } catch (SQLException e) {
                 if (firstException == null) {
-                    firstException = new SQLException();
-                    firstException.initCause(t);
+                    firstException = e;
                 }
             }
         }
@@ -3881,37 +3892,6 @@ public class Util extends XOMUtil {
             }
         }
         return null;
-    }
-
-    /**
-     * Similar to {@link ClassLoader#getResource(String)}, except the lookup
-     *  is in reverse order.<br>
-     *  i.e. returns the resource from the supplied classLoader or the
-     *  one closest to it in the hierarchy, instead of the closest to the root
-     *  class loader
-     * @param classLoader The class loader to fetch from
-     * @param name The resource name
-     * @return A URL object for reading the resource, or null if the resource
-     * could not be found or the invoker doesn't have adequate privileges to get
-     * the resource.
-     * @see ClassLoader#getResource(String)
-     * @see ClassLoader#getResources(String)
-     */
-    public static URL getClosestResource(ClassLoader classLoader, String name) {
-        URL resource = null;
-        try {
-            // The last resource will be from the nearest ClassLoader.
-            Enumeration<URL> resourceCandidates =
-                classLoader.getResources(name);
-            while (resourceCandidates.hasMoreElements()) {
-                resource = resourceCandidates.nextElement();
-            }
-        } catch (IOException ioe) {
-            // ignore exception - it's OK if file is not found
-            // just keep getResource contract and return null
-            Util.discard(ioe);
-        }
-        return resource;
     }
 
     public static abstract class AbstractFlatList<T>

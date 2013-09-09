@@ -69,13 +69,9 @@ public class OracleDialect extends JdbcDialectImpl {
         boolean ascending,
         boolean collateNullsLast)
     {
-        return generateOrderByNullsAnsi(expr, ascending, collateNullsLast);
+            return expr + (ascending ? " ASC" : " DESC");
     }
 
-    @Override
-    public boolean allowsJoinOn() {
-        return false;
-    }
 
     @Override
     public boolean allowsRegularExpressionInWhereClause() {
@@ -217,6 +213,10 @@ public class OracleDialect extends JdbcDialectImpl {
         logTypeInfo(metaData, columnIndex, type);
         return type;
     }
+	@Override
+	public boolean allowsJoinOn() {
+		return true;
+	}
 }
 
 // End OracleDialect.java

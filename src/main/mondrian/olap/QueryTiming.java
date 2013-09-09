@@ -4,12 +4,10 @@
 // http://www.eclipse.org/legal/epl-v10.html.
 // You must accept the terms of that agreement to use this software.
 //
-// Copyright (C) 2011-2013 Pentaho and others
+// Copyright (C) 2011-2011 Pentaho and others
 // All Rights Reserved.
 */
 package mondrian.olap;
-
-import mondrian.util.ArrayStack;
 
 import java.util.*;
 
@@ -34,8 +32,7 @@ import java.util.*;
  */
 public class QueryTiming {
     private boolean enabled;
-    private final ArrayStack<TimingInfo> currentTimings =
-        new ArrayStack<TimingInfo>();
+    private final Stack<TimingInfo> currentTimings = new Stack<TimingInfo>();
     private final Map<String, List<StartEnd>> timings =
         new HashMap<String, List<StartEnd>>();
     private final Map<String, DurationCount> fullTimings =
@@ -47,7 +44,7 @@ public class QueryTiming {
      *
      * @param enabled Whether to collect stats in future
      */
-    public synchronized void init(boolean enabled) {
+    public void init(boolean enabled) {
         this.enabled = enabled;
         currentTimings.clear();
         timings.clear();
@@ -62,7 +59,7 @@ public class QueryTiming {
      *
      * @param name Name of the component
      */
-    public synchronized final void markStart(String name) {
+    public final void markStart(String name) {
         if (enabled) {
             markStartInternal(name);
         }
@@ -73,7 +70,7 @@ public class QueryTiming {
      *
      * @param name Name of the component
      */
-    public synchronized final void markEnd(String name) {
+    public final void markEnd(String name) {
         if (enabled) {
             long tstamp = System.currentTimeMillis();
             markEndInternal(name, tstamp);
@@ -86,7 +83,7 @@ public class QueryTiming {
      * @param name Name of the component
      * @param duration Duration of the execution
      */
-    public synchronized final void markFull(String name, long duration) {
+    public final void markFull(String name, long duration) {
         if (enabled) {
             markFullInternal(name, duration);
         }
@@ -97,7 +94,8 @@ public class QueryTiming {
     }
 
     private void markEndInternal(String name, long tstamp) {
-        if (currentTimings.isEmpty()
+        if (currentTimings == null
+            || currentTimings.isEmpty()
             || !currentTimings.peek().name.equals(name))
         {
             throw new IllegalStateException("end but no start for " + name);
@@ -124,7 +122,7 @@ public class QueryTiming {
         p.duration += duration;
     }
 
-    public synchronized String toString() {
+    public String toString() {
         StringBuilder sb = new StringBuilder();
         for (Map.Entry<String, List<StartEnd>> entry
             : timings.entrySet())
@@ -167,7 +165,7 @@ public class QueryTiming {
     /**
      * @return a collection of all Query component names
      */
-    public synchronized Collection<String> getTimingKeys() {
+    public Collection<String> getTimingKeys() {
         Set<String> keys = new HashSet<String>();
         keys.addAll(timings.keySet());
         keys.addAll(fullTimings.keySet());
@@ -178,7 +176,7 @@ public class QueryTiming {
      * @param key Name of the Query component to get timing information on
      * @return a List of durations
      */
-    public synchronized List<Long> getTimings(String key) {
+    public List<Long> getTimings(String key) {
         List<Long> timingList = new ArrayList<Long>();
         List<StartEnd> regTime = timings.get(key);
         if (regTime != null) {

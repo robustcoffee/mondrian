@@ -195,10 +195,6 @@ class DrillThroughQuerySpec extends AbstractQuerySpec {
     protected void extraPredicates(SqlQuery sqlQuery) {
         super.extraPredicates(sqlQuery);
 
-        if (countOnly) {
-            return;
-        }
-        // generate the select list
         final Set<String> columnNameSet = new HashSet<String>();
         columnNameSet.addAll(columnNames);
 

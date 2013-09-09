@@ -1,0 +1,94 @@
+<project name="ADS_product" default="diff">
+
+	<target name="diff">
+		<jar destfile="lib/mondrian_ads_extension.jar">
+			<fileset dir="lib/mondrian"> 
+				<include name="mondrian/xmla/PropertyDefinition.class"/> 
+				<include name="mondrian/xmla/PropertyDefinition$*.class"/> 
+				<include name="mondrian/xmla/Rowset.class"/> 
+				<include name="mondrian/xmla/Rowset$*.class"/> 
+				<include name="mondrian/xmla/RowsetDefinition.class"/> 
+				<include name="mondrian/xmla/RowsetDefinition$*.class"/> 
+				<include name="mondrian/xmla/XmlaConstants.class"/> 
+				<include name="mondrian/xmla/XmlaConstants$*.class"/> 
+				<include name="mondrian/xmla/XmlaHandler.class"/> 
+				<include name="mondrian/xmla/XmlaHandler$*.class"/> 
+				<include name="mondrian/xmla/XmlaServlet.class"/> 
+				<include name="mondrian/xmla/XmlaServlet$*.class"/> 
+				<include name="mondrian/xmla/impl/DefaultXmlaRequest.class"/> 
+				<include name="mondrian/xmla/impl/DefaultXmlaRequest$*.class"/> 
+				<include name="mondrian/xmla/impl/DefaultXmlaServlet.class"/> 
+				<include name="mondrian/xmla/impl/DefaultXmlaServlet$*.class"/> 
+				<include name="META-INF/services/*"/>
+				<include name="mondrian/spi/Dialect*.class"/>
+				<include name="mondrian/spi/impl/AdsDialect*.class"/>
+				<include name="mondrian/spi/impl/JdbcDialectImpl*.class"/>
+				<include name="mondrian/olap4j/MondrianOlap4jMember*.class"/>
+				<include name="mondrian/olap4j/FactoryJdbc3Impl*.class"/>
+				<include name="mondrian/olap/Query.class"/>
+				<include name="mondrian/olap/Query$*.class"/>
+				<include name="mondrian/olap/MondrianProperties.xml"/>
+				<include name="mondrian/olap/Mondrian.xml"/>
+			</fileset>
+		</jar>
+		
+		<unzip src="lib/mondrian.jar" dest="lib/"/>
+			<jar destfile="lib/mondrian.jar">
+				<fileset dir="lib/mondrian">
+					<exclude name="mondrian/xmla/PropertyDefinition.class"/> 
+					<exclude name="mondrian/xmla/PropertyDefinition$*.class"/> 
+					<exclude name="mondrian/xmla/Rowset.class"/> 
+					<exclude name="mondrian/xmla/Rowset$*.class"/> 
+					<exclude name="mondrian/xmla/RowsetDefinition.class"/> 
+					<exclude name="mondrian/xmla/RowsetDefinition$*.class"/> 
+					<exclude name="mondrian/xmla/XmlaConstants.class"/> 
+					<exclude name="mondrian/xmla/XmlaConstants$*.class"/> 
+					<exclude name="mondrian/xmla/XmlaHandler.class"/> 
+					<exclude name="mondrian/xmla/XmlaHandler$*.class"/> 
+					<exclude name="mondrian/xmla/XmlaServlet.class"/> 
+					<exclude name="mondrian/xmla/XmlaServlet$*.class"/> 
+					<exclude name="mondrian/xmla/impl/DefaultXmlaRequest.class"/> 
+					<exclude name="mondrian/xmla/impl/DefaultXmlaRequest$*.class"/> 
+					<exclude name="mondrian/xmla/impl/DefaultXmlaServlet.class"/> 
+					<exclude name="mondrian/xmla/impl/DefaultXmlaServlet$*.class"/> 
+					<exclude name="META-INF/services/*"/>
+					<exclude name="mondrian/spi/Dialect*.class"/>
+					<exclude name="mondrian/spi/impl/AdsDialect*.class"/>
+					<exclude name="mondrian/spi/impl/JdbcDialectImpl*.class"/>
+					<exclude name="mondrian/olap4j/MondrianOlap4jMember*.class"/>
+					<exclude name="mondrian/olap4j/FactoryJdbc3Impl*.class"/>
+					<exclude name="mondrian/olap/Query.class"/>
+					<exclude name="mondrian/olap/Query$*.class"/>
+					<exclude name="mondrian/olap/MondrianProperties.xml"/>
+					<exclude name="mondrian/olap/Mondrian.xml"/>
+				</fileset>
+			</jar>
+	</target>
+	
+	
+	<target name="diffSrc">
+		<jar destfile="lib/mondrian_ads_extension_src.jar">
+			<fileset dir="src/main"> 
+				<include name="mondrian/xmla/PropertyDefinition.java"/> 
+				<include name="mondrian/xmla/Rowset.jave"/> 
+				<include name="mondrian/xmla/RowsetDefinition.jave"/> 
+				<include name="mondrian/xmla/XmlaConstants.jave"/> 
+				<include name="mondrian/xmla/XmlaHandler.jave"/> 
+				<include name="mondrian/xmla/XmlaServlet.jave"/> 
+				<include name="mondrian/xmla/impl/DefaultXmlaRequest.jave"/> 
+				<include name="mondrian/xmla/impl/DefaultXmlaServlet.jave"/> 
+				<include name="META-INF/services/*"/>
+				<include name="mondrian/spi/Dialect*.java"/>
+				<include name="mondrian/spi/impl/AdsDialect*.java"/>
+				<include name="mondrian/olap4j/MondrianOlap4jMember*.java"/>
+				<include name="mondrian/olap4j/FactoryJdbc3Impl*.java"/>
+				<include name="mondrian/olap/Query.java"/>
+				<include name="mondrian/olap/MondrianProperties.xml"/>
+				<include name="mondrian/olap/Mondrian.xml"/>
+				
+			</fileset>
+		</jar>
+	</target>
+
+
+</project>

@@ -10,6 +10,7 @@
 */
 package mondrian.olap;
 
+import mondrian.rolap.RolapAxis;
 import mondrian.server.Execution;
 import mondrian.server.Statement;
 
@@ -50,8 +51,17 @@ public abstract class ResultBase implements Result {
 
     // implement Result
     public Axis[] getAxes() {
+       
+       
         return axes;
     }
+    
+//    private Axis[] validateAxes(RolapAxis input) {
+//       input.get
+//       
+//       return axes;
+//       
+//    }
 
     // implement Result
     public Axis getSlicerAxis() {

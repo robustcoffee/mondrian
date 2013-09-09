@@ -49,7 +49,7 @@ public interface UtilCompatible {
      * they should be logged under {@link Util}.
      * @param stmt The statement to close.
      */
-    void cancelStatement(Statement stmt);
+    void cancelAndCloseStatement(Statement stmt);
 
     /**
      * Compiles a script to yield a Java interface.

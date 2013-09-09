@@ -232,10 +232,13 @@ public class Query extends QueryPart {
      * Checks whether the property name is present in the query.
      */
     public boolean hasCellProperty(String propertyName) {
+       if(propertyName.equalsIgnoreCase("FORMAT_STRING") || propertyName.equalsIgnoreCase("CELL_ORDINAL") || propertyName.equalsIgnoreCase("LANGUAGE") )
+          return true;
         for (QueryPart cellProp : cellProps) {
             if (((CellProperty)cellProp).isNameEquals(propertyName)) {
                 return true;
             }
+
         }
         return false;
     }

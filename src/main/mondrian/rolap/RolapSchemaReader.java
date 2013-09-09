@@ -25,7 +25,6 @@ import org.eigenbase.util.property.Property;
 import org.olap4j.mdx.IdentifierSegment;
 
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 import javax.sql.DataSource;
 
 /**
@@ -42,7 +41,7 @@ public class RolapSchemaReader
 {
     protected final Role role;
     private final Map<Hierarchy, MemberReader> hierarchyReaders =
-        new ConcurrentHashMap<Hierarchy, MemberReader>();
+        new HashMap<Hierarchy, MemberReader>();
     protected final RolapSchema schema;
     private final SqlConstraintFactory sqlConstraintFactory =
         SqlConstraintFactory.instance();
@@ -79,33 +78,15 @@ public class RolapSchemaReader
         return getLevelMembers(firstLevel, true);
     }
 
-    /**
-     * This method uses a double-checked locking idiom to avoid making the
-     * method fully synchronized, or potentially creating the same MemberReader
-     * more than once.  Double-checked locking can cause issues if
-     * a second thread accesses the field without either a shared lock in
-     * place or the field being specified as volatile.
-     * In this case, hierarchyReaders is a ConcurrentHashMap,
-     * which internally uses volatile load semantics for read operations.
-     * This assures values written by one thread will be visible when read by
-     * others.
-     * http://en.wikipedia.org/wiki/Double-checked_locking
-     */
-    public MemberReader getMemberReader(Hierarchy hierarchy) {
+    public synchronized MemberReader getMemberReader(Hierarchy hierarchy) {
         MemberReader memberReader = hierarchyReaders.get(hierarchy);
         if (memberReader == null) {
-            synchronized (this) {
-                memberReader = hierarchyReaders.get(hierarchy);
-                if (memberReader == null) {
-                    memberReader =
-                        ((RolapHierarchy) hierarchy).createMemberReader(role);
-                    hierarchyReaders.put(hierarchy, memberReader);
-                }
-            }
+            memberReader =
+                ((RolapHierarchy) hierarchy).createMemberReader(role);
+            hierarchyReaders.put(hierarchy, memberReader);
         }
         return memberReader;
     }
-
 
     public Member substitute(Member member) {
         final MemberReader memberReader =

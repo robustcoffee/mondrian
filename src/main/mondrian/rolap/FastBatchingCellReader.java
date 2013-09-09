@@ -44,8 +44,6 @@ public class FastBatchingCellReader implements CellReader {
     private static final Logger LOGGER =
         Logger.getLogger(FastBatchingCellReader.class);
 
-    private final int cellRequestLimit;
-
     private final RolapCube cube;
 
     /**
@@ -105,11 +103,6 @@ public class FastBatchingCellReader implements CellReader {
         cacheMgr = aggMgr.cacheMgr;
         pinnedSegments = this.aggMgr.createPinSet();
         cacheEnabled = !MondrianProperties.instance().DisableCaching.get();
-
-        cellRequestLimit =
-            MondrianProperties.instance().CellBatchSize.get() <= 0
-                ? 100000 // TODO Make this logic into a pluggable algorithm.
-                : MondrianProperties.instance().CellBatchSize.get();
     }
 
     public Object get(RolapEvaluator evaluator) {
@@ -171,7 +164,12 @@ public class FastBatchingCellReader implements CellReader {
         assert !request.isUnsatisfiable();
         ++missCount;
         cellRequests.add(request);
-        if (cellRequests.size() % cellRequestLimit == 0) {
+        int limit =
+            MondrianProperties.instance().CellBatchSize.get();
+        if (limit <= 0) {
+            limit = 50000; // TODO Make this logic into a pluggable algorithm.
+        }
+        if (cellRequests.size() % limit == 0) {
             // Signal that it's time to ask the cache manager if it has cells
             // we need in the cache. Not really an exception.
             throw CellRequestQuantumExceededException.INSTANCE;

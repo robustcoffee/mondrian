@@ -974,7 +974,17 @@ public class RolapConnection extends ConnectionBase {
                     }
                 }
             }
+            
+            validateFilteredList(tupleList, filteredTupleList);
+           
             this.axes[axis] = new RolapAxis(filteredTupleList);
+        }
+        
+        private TupleList validateFilteredList(TupleList originalTuples, TupleList filteredTuples){
+           
+          List<Member> tmp =  originalTuples.get(0);
+        
+           return null;
         }
 
         protected Logger getLogger() {
@@ -998,6 +1008,7 @@ public class RolapConnection extends ConnectionBase {
         private boolean isEmptyRecurse(int fixedAxis, int axis) {
             if (axis < 0) {
                 RolapCell cell = (RolapCell) underlying.getCell(pos);
+//                return false;
                 return cell.isNull();
             } else if (axis == fixedAxis) {
                 return isEmptyRecurse(fixedAxis, axis - 1);

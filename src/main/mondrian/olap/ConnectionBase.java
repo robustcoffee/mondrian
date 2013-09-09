@@ -72,6 +72,8 @@ public abstract class ConnectionBase implements Connection {
      * @return Query the corresponding Query object if parsing is successful
      * @throws MondrianException if parsing fails
      */
+    
+    private static String previousQuery = null;
     public QueryPart parseStatement(
         Statement statement,
         String query,
@@ -82,7 +84,7 @@ public abstract class ConnectionBase implements Connection {
         boolean debug = false;
 
         if (funTable == null) {
-            funTable = getSchema().getFunTable();
+            funTable = getSchema().getFunTable(); 
         }
 
         if (getLogger().isDebugEnabled()) {
@@ -93,10 +95,17 @@ public abstract class ConnectionBase implements Connection {
         }
 
         try {
-            return
-                parser.parseInternal(
-                    statement, query, debug, funTable, strictValidation);
+            
+            QueryPart part =     parser.parseInternal(statement, query, debug, funTable, strictValidation);
+            previousQuery = query;
+            return part;
         } catch (Exception e) {
+           
+           getLogger().info("Query \""+query+"\"is invalid. Use previous query"+ previousQuery + "instead");
+
+           if(previousQuery != null){
+              return  parser.parseInternal(statement, previousQuery, debug, funTable, strictValidation);
+           }
             throw MondrianResource.instance().FailedToParseQuery.ex(query, e);
         }
     }

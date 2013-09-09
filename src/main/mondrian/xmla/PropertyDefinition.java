@@ -13,7 +13,9 @@ package mondrian.xmla;
 import mondrian.olap.MondrianServer;
 
 import org.olap4j.impl.Olap4jUtil;
+import org.olap4j.metadata.XmlaConstant;
 import org.olap4j.metadata.XmlaConstants;
+import org.olap4j.metadata.XmlaConstants.Method;
 
 import java.util.Set;
 
@@ -28,7 +30,7 @@ public enum PropertyDefinition {
         RowsetDefinition.Type.Enumeration,
         Olap4jUtil.enumSetAllOf(XmlaConstants.AxisFormat.class),
         XmlaConstants.Access.Write,
-        "",
+        "TupleFormat",
         XmlaConstants.Method.EXECUTE,
         "Determines the format used within an MDDataSet result set to describe the axes of the multidimensional dataset. This property can have the values listed in the following table: TupleFormat (default), ClusterFormat, CustomFormat."),
 
@@ -46,7 +48,7 @@ public enum PropertyDefinition {
         RowsetDefinition.Type.String,
         null,
         XmlaConstants.Access.ReadWrite,
-        "",
+        "FoodMart",
         XmlaConstants.Method.DISCOVER_AND_EXECUTE,
         "When establishing a session with an Analysis Services instance to send an XMLA command, this property is equivalent to the OLE DB property, DBPROP_INIT_CATALOG.\n"
         + "When you set this property during a session to change the current database for the session, this property is equivalent to the OLE DB property, DBPROP_CURRENTCATALOG.\n"
@@ -60,7 +62,7 @@ public enum PropertyDefinition {
         XmlaConstants.Method.DISCOVER_AND_EXECUTE,
         "An enumerator that specifies what type of data is returned in the result set.\n"
         + "None: Allows the structure of the command to be verified, but not executed. Analogous to using Prepare to check syntax, and so on.\n"
-        + "Schema: Contains the XML schema (which indicates column information, and so on) that relates to the requested query.\n"
+        + "Schema: Contains the XML schemas (which indicates column information, and so on) that relates to the requested query.\n"
         + "Data: Contains only the data that was requested.\n"
         + "SchemaData: Returns both the schema information as well as the data."),
 
@@ -124,7 +126,7 @@ public enum PropertyDefinition {
         RowsetDefinition.Type.UnsignedInteger,
         null,
         XmlaConstants.Access.ReadWrite,
-        "None",
+        "1033",
         XmlaConstants.Method.DISCOVER_AND_EXECUTE,
         "Use this to read or set the numeric locale identifier for this request. The default is provider-specific.\n"
         + "For the complete hexadecimal list of language identifiers, search on \"Language Identifiers\" in the MSDN Library at http://www.msdn.microsoft.com.\n"
@@ -146,19 +148,47 @@ public enum PropertyDefinition {
         XmlaConstants.Method.DISCOVER_AND_EXECUTE,
         "This property is deprecated in XMLA 1.1. To support legacy applications, the provider accepts but ignores the Password property setting when it is used with the Discover and Execute method"),
 
+        SafetyOptions(
+                 RowsetDefinition.Type.Integer,
+                 null,
+                 org.olap4j.metadata.XmlaConstants.Access.ReadWrite,
+                 "",
+                 XmlaConstants.Method.DISCOVER_AND_EXECUTE,
+                 ""),
+
     ProviderName(
         RowsetDefinition.Type.String,
         null,
         XmlaConstants.Access.Read,
-        "Mondrian XML for Analysis Provider",
+        //"Mondrian XML for Analysis Provider",
+        "OLAP Server",
         XmlaConstants.Method.DISCOVER,
         "The XML for Analysis Provider name."),
 
-    ProviderVersion(
+        ProviderType(
+                 RowsetDefinition.Type.Integer,
+                 null,
+                 XmlaConstants.Access.Read,
+                 "6",
+                 XmlaConstants.Method.DISCOVER_AND_EXECUTE,
+                 "Provider Type"),
+        
+        ProviderVersion(
         RowsetDefinition.Type.String,
         null,
         XmlaConstants.Access.Read,
-        MondrianServer.forId(null).getVersion().getVersionString(),
+       // MondrianServer.forId(null).getVersion().getVersionString(),
+        "10.0.1600.22",
+        XmlaConstants.Method.DISCOVER,
+        "The version of the Mondrian XMLA Provider"),
+        
+        
+        DBMSVersion(
+        RowsetDefinition.Type.String,
+        null,
+        XmlaConstants.Access.Read,
+       // MondrianServer.forId(null).getVersion().getVersionString(),
+        "10.0.1600.22",
         XmlaConstants.Method.DISCOVER,
         "The version of the Mondrian XMLA Provider"),
 
@@ -223,6 +253,125 @@ public enum PropertyDefinition {
         "List of fields to return for drill-through.\n"
         + "The default value of this property is the empty string,"
         + "in which case, all fields are returned."),
+        
+      DbpropMsmdFlattened2(
+         RowsetDefinition.Type.Boolean,
+         null,
+         XmlaConstants.Access.ReadWrite,
+         "false",
+         XmlaConstants.Method.DISCOVER_AND_EXECUTE,
+         "Outputs all members of a parent-child hierarchy in a single table " +
+         "column in the flattened result, unless the parent-child " +
+         "hierarchy is requested on Axis 0. " +
+         "The Level template for output columns is not used."),
+                 
+                 
+                 MdpropMdxDrillFunctions(
+                          RowsetDefinition.Type.Integer,
+                          null,
+                          XmlaConstants.Access.Read,
+                         "7",
+                         // "3", //simba
+                          XmlaConstants.Method.DISCOVER_AND_EXECUTE,
+                          "SQL Server 2008 R2 always returns the value 7 for MdpropMdxDrillFunctions. Previous versions of SQL Server return the value 3."
+                          ),
+    MdpropMdxSubqueries(
+             RowsetDefinition.Type.Integer,
+             null,
+             XmlaConstants.Access.Read,
+             
+             // SSAS uses value "31", but Mondrian doesn't support it
+             //"3",//simba value
+             "1",
+             //"1", //it's the only setting works for Mondrian + MSOLAP
+             XmlaConstants.Method.DISCOVER_AND_EXECUTE,
+             ""),         
+             MdxMissingMemberMode(
+                      RowsetDefinition.Type.String,
+                      null,
+                      XmlaConstants.Access.Write,
+                      "Default",
+                      XmlaConstants.Method.DISCOVER_AND_EXECUTE,
+                      ""), 
+             
+   MdpropMdxNamedSets(
+            RowsetDefinition.Type.Integer, 
+            null, 
+            XmlaConstants.Access.Read, 
+            "15", 
+            XmlaConstants.Method.DISCOVER_AND_EXECUTE, 
+            ""),
+
+   MdpropMdxDdlExtensions(
+            RowsetDefinition.Type.Integer, 
+            null, 
+            XmlaConstants.Access.Read, 
+           //suggested value "31",
+           // "15",//simba value
+            "0",
+            XmlaConstants.Method.DISCOVER_AND_EXECUTE, 
+            "(0x1): Create Cube is supported;  " +
+            "(0x2). InsertInto is supported; " +
+            "(0x4): Refresh Cube is supported; " +
+            "(0x8): Create Session is supported; " +
+            "(0x10): Create Global Cube is supported."),
+
+   DbpropMsmdSubqueries(
+            RowsetDefinition.Type.Integer, 
+            null, 
+            XmlaConstants.Access.ReadWrite, 
+            "0", 
+            XmlaConstants.Method.DISCOVER_AND_EXECUTE, 
+            ""),
+            DbpropMsmdMDXCompatibility(
+                     RowsetDefinition.Type.Integer, 
+                     null, 
+                     XmlaConstants.Access.ReadWrite, 
+                     "0", 
+                     XmlaConstants.Method.DISCOVER_AND_EXECUTE, 
+                     "0: Calculated members are not restricted by subselects;" +
+                     "1: Calculated members are restricted by subselects. This value does not support arbitrary-shaped subselects." +
+                     "2: Calculated members are restricted by subselects. This value supports arbitrary-shaped subselects."),
+
+   DbpropMsmdOptimizeResponse(
+            RowsetDefinition.Type.Long, 
+            null, 
+            XmlaConstants.Access.ReadWrite, 
+            "0", 
+            XmlaConstants.Method.DISCOVER_AND_EXECUTE, 
+            ""),
+                                        
+   DbpropMsmdActivityID(
+            RowsetDefinition.Type.String,
+            null, 
+            XmlaConstants.Access.ReadWrite, 
+            "5bf0dc2a-4b00-4eb9-830c-699fdcaf5731", 
+            XmlaConstants.Method.DISCOVER_AND_EXECUTE, 
+            ""),
+
+   DbpropMsmdRequestID(
+            RowsetDefinition.Type.String, 
+            null, 
+            XmlaConstants.Access.ReadWrite, 
+            "ae82ce57-fd92-4d0a-a940-f258b12b259c", 
+            XmlaConstants.Method.DISCOVER_AND_EXECUTE, 
+            ""),
+            
+            ServerName(
+                     RowsetDefinition.Type.String, 
+                     null, 
+                     XmlaConstants.Access.Read, 
+                     "Ads_Mondrian", 
+                     XmlaConstants.Method.DISCOVER_AND_EXECUTE, 
+                     ""),
+                     
+   ResponseEncoding(RowsetDefinition.Type.String,
+                     null,
+                     XmlaConstants.Access.ReadWrite,
+                     "Default",
+                     XmlaConstants.Method.DISCOVER,
+                     ""),
+
 
     // mondrian-specific property for advanced drill-through
     AdvancedFlag(
@@ -270,6 +419,7 @@ public enum PropertyDefinition {
     public String getDescription() {
         return description;
     }
+    
 }
 
 // End PropertyDefinition.java

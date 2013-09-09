@@ -25,7 +25,7 @@ import java.util.*;
  * @author jhyde
  * @since May 24, 2007
  */
-class MondrianOlap4jCellSetAxis implements CellSetAxis {
+public class MondrianOlap4jCellSetAxis implements CellSetAxis {
     private final MondrianOlap4jCellSet olap4jCellSet;
     private final mondrian.olap.QueryAxis queryAxis;
     private final RolapAxis axis;
@@ -37,7 +37,7 @@ class MondrianOlap4jCellSetAxis implements CellSetAxis {
      * @param queryAxis Query axis
      * @param axis Axis
      */
-    MondrianOlap4jCellSetAxis(
+    public MondrianOlap4jCellSetAxis(
         MondrianOlap4jCellSet olap4jCellSet,
         mondrian.olap.QueryAxis queryAxis,
         RolapAxis axis)
@@ -89,8 +89,8 @@ class MondrianOlap4jCellSetAxis implements CellSetAxis {
         return getPositions().listIterator();
     }
 
-    private class MondrianOlap4jPosition implements Position {
-        private final TupleList tupleList;
+    public class MondrianOlap4jPosition implements Position {
+        private  final TupleList tupleList;
         private final int index;
 
         /**

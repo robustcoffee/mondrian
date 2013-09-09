@@ -31,7 +31,7 @@ public abstract class XmlaServlet
     extends HttpServlet
     implements XmlaConstants
 {
-    protected static final Logger LOGGER = Logger.getLogger(XmlaServlet.class);
+    protected static Logger LOGGER = Logger.getLogger(XmlaServlet.class);
 
     public static final String PARAM_DATASOURCES_CONFIG = "DataSourcesConfig";
     public static final String PARAM_OPTIONAL_DATASOURCE_CONFIG =
@@ -137,6 +137,7 @@ public abstract class XmlaServlet
      * Main entry for HTTP post method
      *
      */
+   public  boolean isDiscoverRowSet = false;
     protected void doPost(
         HttpServletRequest request,
         HttpServletResponse response)
@@ -168,7 +169,12 @@ public abstract class XmlaServlet
                         + "': Use default character encoding from HTTP client "
                         + "for now");
                 }
+                
             }
+            else {
+               request.setCharacterEncoding("UTF-8");
+               response.setCharacterEncoding("UTF-8");           
+               }
 
             response.setContentType(mimeType.getMimeType());
 
@@ -373,6 +379,10 @@ public abstract class XmlaServlet
                 LOGGER.error("Errors when handling XML/A message", xex);
                 handleFault(response, responseSoapParts, phase, xex);
                 phase = Phase.SEND_ERROR;
+                if (isDiscoverRowSet)
+                   System.out.println("");
+                   
+
                 marshallSoapMessage(response, responseSoapParts, mimeType);
             }
         } catch (Throwable t) {

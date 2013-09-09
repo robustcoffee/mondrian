@@ -844,6 +844,7 @@ public class Property extends EnumeratedValues.BasicValue {
                 FORMAT_EXP,
                 ACTION_TYPE,
                 DRILLTHROUGH_COUNT,
+                LANGUAGE
             });
 
     private static final int MAX_ORDINAL = 56;

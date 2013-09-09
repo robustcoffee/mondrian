@@ -176,6 +176,8 @@ demo/access/MondrianFoodMart.mdb"/>
     <pathelement location="${ant.home}/lib/optional.jar"/>
     <pathelement location="${wb.plugins.dir}/kettle-dbdialog.jar"/>
     <pathelement location="${wb.plugins.dir}/kettle-core.jar"/>
+    <pathelement location="${wb.plugins.dir}/kettle-db.jar"/>
+    <pathelement location="${wb.plugins.dir}/kettle-engine.jar"/>
     <pathelement location="${wb.plugins.dir}/pentaho-xul-core.jar"/>
     <pathelement location="${wb.plugins.dir}/pentaho-xul-swing.jar"/>
     <pathelement location="${wb.plugins.dir}/commons-io.jar"/>
@@ -391,22 +393,7 @@ demo/access/MondrianFoodMart.mdb"/>
     <mkdir dir="${dist.dir}"/>
   </target>
 
-  <target name="resolve" unless="skip.download" >
-      <!-- Use symbolic links, rather than copying, on unix. -->
-      <condition property="symlink" value="true">
-          <os family="unix"/>
-      </condition>
-      <echo message="symlink=${symlink}"/>
-
-      <!-- Mondrian dependencies. -->
-      <ivy:resolve file="ivy.xml"/>
-      <ivy:retrieve symlink="${symlink}" type="jar,war"
-          pattern="${lib.dir}/[module].[ext]"/>
-      <ivy:retrieve symlink="${symlink}" type="source,javadoc"
-          pattern="${lib.dir}/[module]-[type].[ext]"/>
-  </target>
-
-  <target name="resolve-for-workbench" depends="prepare" unless="skip.download">
+  <target name="resolve" unless="skip.download">
       <!-- Use symbolic links, rather than copying, on unix. -->
       <condition property="symlink" value="true">
           <os family="unix"/>
@@ -419,18 +406,14 @@ demo/access/MondrianFoodMart.mdb"/>
           pattern="${wb.plugins.dir}/[module].[ext]"/>
       <ivy:retrieve symlink="${symlink}" type="source,javadoc"
           pattern="${wb.plugins.dir}/[module]-[type].[ext]"/>
-  </target>
 
-  <target name="resolve-workbench-runtime-deps" depends="prepare" 
-          unless="skip.download"
-          description="Resolves runtime dependencies not required for compilation.">
-    <ivy:resolve file="workbench/assembly_ivy.xml"/>
-    <ivy:retrieve symlink="${symlink}" type="jar"
-                  pattern="${wb.plugins.dir}/[module].[ext]"/>
-    <ivy:retrieve symlink="${symlink}" type="source,javadoc"
-                  pattern="${wb.plugins.dir}/[module]-[type].[ext]"/>
+      <!-- Mondrian dependencies. -->
+      <ivy:resolve file="ivy.xml"/>
+      <ivy:retrieve symlink="${symlink}" type="jar,war"
+          pattern="${lib.dir}/[module].[ext]"/>
+      <ivy:retrieve symlink="${symlink}" type="source,javadoc"
+          pattern="${lib.dir}/[module]-[type].[ext]"/>
   </target>
-
 
   <target name="cmdrunner" depends="jar">
     <property name="crtmp.dir" location="${build.dir}/tmpcmdrunner"/>
@@ -573,15 +556,6 @@ If you wish to build for this JDK, modify ${unix.script}.
 
   <target name="compile.java" depends="apologise" if="java.version.matches.requested">
     <echo>Compiling on JVM Version: ${java.runtime.version}</echo>
-    <condition property="include.gui">
-      <and>
-        <isset property="include.workbench" />
-        <!-- workbench kettle dependencies are incompatible with jdk1.5 -->
-        <isset property="jdk16.present" />
-      </and>
-    </condition>
-    <echo>include.gui=${include.gui}</echo>
-
     <javac
         srcdir="${java.dir}"
         destdir="${classes.dir}"
@@ -594,7 +568,6 @@ If you wish to build for this JDK, modify ${unix.script}.
       <exclude name="mondrian/olap4j/FactoryJdbc4Plus.java" if="jdk16.not.present"/>
       <exclude name="mondrian/olap4j/FactoryJdbc41Impl.java" if="jdk17.not.present"/>
       <exclude name="mondrian/util/UtilCompatibleJdk16.java" if="jdk15.present"/>
-      <exclude name="mondrian/gui/**/*.java"                 unless="include.gui" /> 
     </javac>
     <copy file="src/main/mondrian/rolap/aggmatcher/DefaultRules.xml"
         todir="${classes.dir}"/>
@@ -1009,7 +982,6 @@ workbench/mondrian.properties,
 workbench/readme.txt,
 workbench/workbench.bat,
 workbench/workbench.sh,
-workbench/workbench.command,
 build.xml,
 build.bat,
 build.sh,
@@ -1264,45 +1236,30 @@ doc/**/*.xml"
     </tar>
   </target>
 
-  <target name="set-compile-args">
-    <property name="compile.default.args" value="-Dskip.download=true compile.java" />
-    <if>
-      <istrue value="${include.workbench}" />
-      <then>
-        <property name="compile.workbench.arg" value="-Dinclude.workbench=true" />
-      </then>
-      <else>
-        <property name="compile.workbench.arg" value="" />
-      </else>
-    </if>
-    <property name="compile.args" value="${compile.workbench.arg} ${compile.default.args}" />
-  </target>
-
-  <target name="compileJdk15" depends="set-compile-args" >
-
+  <target name="compileJdk15">
     <exec osfamily="unix" failonerror="true" executable="${unix.script}">
-      <arg line="jdk1.5 ${compile.args}"/>
+      <arg line="jdk1.5 -Dskip.download=true compile.java"/>
     </exec>
     <exec osfamily="windows" failonerror="true" dir="." executable="cmd">
-      <arg line="/c .\buildOnJdk.bat jdk1.5 ${compile.args}"/>
+      <arg line="/c .\buildOnJdk.bat jdk1.5 -Dskip.download=true compile.java"/>
     </exec>
   </target>
 
-  <target name="compileJdk16" depends="set-compile-args">
+  <target name="compileJdk16">
     <exec osfamily="unix" failonerror="true" executable="${unix.script}">
-      <arg line="jdk1.6 ${compile.args}"/>
+      <arg line="jdk1.6 -Dskip.download=true compile.java"/>
     </exec>
     <exec osfamily="windows" failonerror="true" dir="." executable="cmd">
-      <arg line="/c .\buildOnJdk.bat jdk1.6 ${compile.args}"/>
+      <arg line="/c .\buildOnJdk.bat jdk1.6 -Dskip.download=true compile.java"/>
     </exec>
   </target>
 
-  <target name="compileJdk17" depends="set-compile-args">
+  <target name="compileJdk17">
     <exec osfamily="unix" failonerror="true" executable="${unix.script}">
-      <arg line="jdk1.7 ${compile.args}"/>
+      <arg line="jdk1.7 -Dskip.download=true compile.java"/>
     </exec>
     <exec osfamily="windows" failonerror="true" dir="." executable="cmd">
-      <arg line="/c .\buildOnJdk.bat jdk1.7 ${compile.args}"/>
+      <arg line="/c .\buildOnJdk.bat jdk1.7 -Dskip.download=true compile.java"/>
     </exec>
   </target>
 
@@ -1700,14 +1657,7 @@ xalan.jar"/>
     <copy file="${war.file}" todir="${mondrian.webapp.deploy}"/>
   </target>
 
-  <target name="compile-with-workbench">
-    <echo message="setting include.workbench to true" />
-    <antcall target="compile">
-      <param name="include.workbench" value="true" />
-    </antcall>    
-  </target>
-
-  <target name="workbench" depends="resolve-for-workbench,compile-with-workbench,jar"> 
+  <target name="workbench" depends="jar">
     <jar jarfile="${workbench.jar.file}" update="true">
       <fileset
           dir="${classes.dir}"
@@ -1749,9 +1699,8 @@ xalan.jar"/>
     </java>
   </target>
 
-
   <target name="workbench-dist" 
-      depends="resolve-workbench-runtime-deps,version,workbench">
+      depends="version,workbench">
     <mkdir dir="${dist.dir}" />
     <delete file="${dist.dir}/${workbench.zip-dist.file}"/>
     <zip destfile="${dist.dir}/${workbench.zip-dist.file}">
@@ -1783,20 +1732,15 @@ xalan.jar"/>
           dir="workbench"
           prefix="${workbench.dist.name}">
             <include name="**/*.sh" />
-      		<include name="**/*.command"/>
             <include name="**/JavaApplicationStub" />
    		</zipfileset>
-        <zipfileset
+      	<zipfileset
           dir="workbench"
           prefix="${workbench.dist.name}">
-            <include name="**/*"/>
-            <exclude name="**/*.sh"/>
-        	<exclude name="**/*.command"/>
-            <exclude name="**/plugins/*-source.jar"/>
-            <exclude name="**/plugins/*-javadoc.jar"/>
-            <exclude name="**/plugins/junit.jar"/>
+      		<include name="**/*" />
+            <exclude name="**/*.sh" />
             <exclude name="**/JavaApplicationStub" />
-        </zipfileset>
+   		</zipfileset>
       	<zipfileset
           dir="src/main"
           prefix="${workbench.dist.name}/src"
@@ -1863,14 +1807,14 @@ xalan.jar"/>
          Deploys the workbench jar to a maven repository
       ====================================================================-->
 
-  <target name="publish-workbench-jar" depends="install-antcontrib, workbench">
+  <target name="publish-workbench-jar" depends="install-antcontrib, workbench-dist">
     <antcall target="maven-publish-jar">
       <param name="publish.groupId" value="${ivy.artifact.group}" />
       <param name="publish.version" value="${project.revision}" />
       <param name="publish.artifactId" value="workbench" />
       <param name="publish.file" value="${workbench.jar.file}" />
       <param name="publish.packaging" value="jar" />
-      <param name="publish.generatePom" value="${publish.generatePom}" />
+      <param name="publish.generatePom" value="false" />
     </antcall>
   </target>
 
@@ -1922,65 +1866,6 @@ xalan.jar"/>
       </if>
     </sequential>
   </target>
-
-  <target name="ivy-report">
-    <antcall target="subfloor.ivy-report"/>
-    <ivy:resolve file="workbench/${ivyfile}" conf="${ivy.configs}" />
-    <ivy:report xml="true" todir="${ivy.reports.dir}" />
-  </target>
-
-	
-	  <!-- ======================================== EULA assembly packaging ========================================= -->
-
-		<property name="pentaho-eula-assembly-pom.version" value="1.0.9" />
-
-		<target name="package-eula" depends="install-antcontrib">
-
-			<if>
-				<not>
-					<available file="${dist.dir}/pentaho-eula-assembly-pom-${pentaho-eula-assembly-pom.version}-pom.xml" type="file" />
-				</not>
-				<then>
-					<get src="http://repo.pentaho.org/artifactory/private-release/com/pentaho/pentaho-eula-assembly-pom/${pentaho-eula-assembly-pom.version}/pentaho-eula-assembly-pom-${pentaho-eula-assembly-pom.version}-pom.xml" 
-		              dest="${dist.dir}/pentaho-eula-assembly-pom-${pentaho-eula-assembly-pom.version}-pom.xml" 
-		              verbose="true" />
-				</then>
-			</if>
-
-			<echo>
-		          mvn
-		          -f
-		          ${dist.dir}/pentaho-eula-assembly-pom-${pentaho-eula-assembly-pom.version}-pom.xml
-		          -DartifactName=${artifactName}
-		          -Ddist.dir=${dist.dir}
-		          package
-		        </echo>
-			<if>
-				<isset property="isWindows" />
-				<then>
-					<exec executable="cmd">
-						<arg value="/c" />
-						<arg value="mvn.bat" />
-						<arg value="-f" />
-						<arg value="${dist.dir}/pentaho-eula-assembly-pom-${pentaho-eula-assembly-pom.version}-pom.xml" />
-						<arg value="-DartifactName=${artifactName}" />
-						<arg value="-Ddist.dir=${dist.dir}" />
-						<arg value="package" />
-					</exec>
-				</then>
-				<else>
-					<exec executable="mvn">
-						<arg value="-f" />
-						<arg value="${dist.dir}/pentaho-eula-assembly-pom-${pentaho-eula-assembly-pom.version}-pom.xml" />
-						<arg value="-DartifactName=${artifactName}" />
-						<arg value="-Ddist.dir=${dist.dir}" />
-						<arg value="package" />
-					</exec>
-				</else>
-			</if>
-
-		</target>	
-
 
 </project>
 

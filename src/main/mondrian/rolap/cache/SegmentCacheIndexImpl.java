@@ -18,15 +18,12 @@ import mondrian.server.Execution;
 import mondrian.spi.*;
 import mondrian.util.*;
 
-import org.apache.log4j.Logger;
-
 import java.io.PrintWriter;
 import java.sql.Statement;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Future;
-
 
 /**
  * Data structure that identifies which segments contain cells.
@@ -36,9 +33,6 @@ import java.util.concurrent.Future;
  * @author Julian Hyde
  */
 public class SegmentCacheIndexImpl implements SegmentCacheIndex {
-
-    private static final Logger LOGGER =
-        Logger.getLogger(SegmentCacheIndexImpl.class);
 
     private final Map<List, List<SegmentHeader>> bitkeyMap =
         new HashMap<List, List<SegmentHeader>>();
@@ -214,10 +208,8 @@ public class SegmentCacheIndexImpl implements SegmentCacheIndex {
         checkThread();
 
         final HeaderInfo headerInfo = headerMap.get(header);
-        if (headerInfo == null) {
-            LOGGER.trace("loadFailed: Missing header " + header);
-            return;
-        }
+        assert headerInfo != null
+            : "segment header " + header.getUniqueID() + " is missing";
         assert headerInfo.slot != null
             : "segment header " + header.getUniqueID() + " is not loading";
         headerInfo.slot.fail(throwable);
@@ -463,16 +455,7 @@ public class SegmentCacheIndexImpl implements SegmentCacheIndex {
                 header,
                 new QueryCanceledException(
                     "Canceling due to an absence of interested parties."));
-            // We only want to cancel the statement, but we can't close it.
-            // Some drivers will not notice the interruption flag on their
-            // own thread before a considerable time has passed. If we were
-            // using a pooling layer, calling close() would make the
-            // underlying connection available again, despite the first
-            // statement still being processed. Some drivers will fail
-            // there. It is therefore important to close and release the
-            // resources on the proper thread, namely, the thread which
-            // runs the actual statement.
-            Util.cancelStatement(stmt);
+            Util.cancelAndCloseStatement(stmt);
         }
     }
 
